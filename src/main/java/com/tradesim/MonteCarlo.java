@@ -1,7 +1,9 @@
 package com.tradesim;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tradesim.model.Trade;
 
+import java.io.PrintWriter;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
@@ -81,46 +83,59 @@ public class MonteCarlo {
         return r;
     }
 
-    public static void runAndSummarizeSingleSimulation(Config cfg) {
+    public static void runAndSummarizeSingleSimulation(Config cfg) throws Exception {
         Map<String, Object> result = MonteCarlo.runSingleSimulation(cfg);
         List<Map<String, Object>> tradeLog = (List<Map<String, Object>>) result.get("trade_log");
 
-//            try (PrintWriter writer = new PrintWriter("trade_log.csv")) {
-//                // Write header
-//                writer.println("trade_num,outcome,rrr,actual_risk_pct,risk_amount,amount,start_balance,end_balance");
-//
-//                for (Map<String, Object> trade : tradeLog) {
-//                    writer.printf("%s,%s,%s,%s,%s,%s,%s,%s%n",
-//                            trade.get("trade_num"),
-//                            trade.get("outcome"),
-//                            trade.get("rrr"),
-//                            trade.get("actual_risk_pct"),
-//                            trade.get("risk_amount"),
-//                            trade.get("amount"),
-//                            trade.get("start_balance"),
-//                            trade.get("end_balance"));
-//                }
-//            }
         if (tradeLog != null && !tradeLog.isEmpty()) {
-            for (Map<String, Object> trade : tradeLog) {
-                int tradeNum = (int) trade.get("trade_num");
-                String outcome = (String) trade.get("outcome");
-                double rrr = (double) trade.get("rrr");
-                double actualRiskPct = ((Number) trade.get("actual_risk_pct")).doubleValue();
-                double riskAmount = ((Number) trade.get("risk_amount")).doubleValue();
-                double amount = ((Number) trade.get("amount")).doubleValue();
-                long startBalance = ((Number) trade.get("start_balance")).longValue();
-                long endBalance = ((Number) trade.get("end_balance")).longValue();
+            try (PrintWriter fileWriter = new PrintWriter("trade_log.csv")) {
+                String headerRow = "%-10s | %-8s | %-4s | %-16s | %-12s | %-8s | %-14s | %-11s%n".formatted("trade_num", "outcome", "rrr", "actual_risk_pct", "risk_amount",
+                        "amount", "start_balance", "end_balance");
+                System.out.printf(headerRow);
 
-                System.out.printf("%-10d | %-8s | %-4.1f | %-16.2f | %-12s | %-8s | %-14s | %-11s%n",
-                        tradeNum,
-                        outcome,
-                        rrr,
-                        actualRiskPct,
-                        formatWithUnderscores((long) riskAmount),
-                        formatWithUnderscores((long) amount),
-                        formatWithUnderscores(startBalance),
-                        formatWithUnderscores(endBalance));
+                // Print Summary
+                fileWriter.println("\nSUMMARY");
+                fileWriter.println("=======");
+
+                fileWriter.printf("Min RR, %f%n", cfg.minRr);
+                fileWriter.printf("Max RR, %f%n", cfg.maxRr);
+                fileWriter.printf("Min WinRate, %.2f%%%n", 100*cfg.winRateLow);
+                fileWriter.printf("Max WinRate, %.2f%%%n", 100*cfg.winRateHigh);
+                fileWriter.printf("Final Balance,\"%,d\"%n", (long) result.get("final_balance"));
+
+                fileWriter.printf("=======%n%n");
+
+                fileWriter.println("trade_num,outcome,rrr,actual_risk_pct,risk_amount,amount,start_balance,end_balance");
+                String print_pattern = "%-10d | %-8s | %-4.1f | %-16.2f | %-12s | %-8s | %-14s | %-11s%n";
+                String csv_pattern = "%-10d , %-8s , %-4.1f , %-16.2f , %-12d , %-8d , %-14d , %-11d%n";
+                for (Map<String, Object> trade : tradeLog) {
+                    int tradeNum = (int) trade.get("trade_num");
+                    String outcome = (String) trade.get("outcome");
+                    double rrr = (double) trade.get("rrr");
+                    double actualRiskPct = ((Number) trade.get("actual_risk_pct")).doubleValue();
+                    double riskAmount = ((Number) trade.get("risk_amount")).doubleValue();
+                    double amount = ((Number) trade.get("amount")).doubleValue();
+                    long startBalance = ((Number) trade.get("start_balance")).longValue();
+                    long endBalance = ((Number) trade.get("end_balance")).longValue();
+                    String row = print_pattern.formatted(tradeNum,
+                            outcome,
+                            rrr,
+                            actualRiskPct,
+                            formatWithUnderscores((long) riskAmount),
+                            formatWithUnderscores((long) amount),
+                            formatWithUnderscores(startBalance),
+                            formatWithUnderscores(endBalance));
+                    System.out.printf(row);
+
+                    fileWriter.printf(Locale.US, csv_pattern, tradeNum,
+                            outcome,
+                            rrr,
+                            actualRiskPct,
+                            (long) riskAmount,
+                            (long) amount,
+                            startBalance,
+                            endBalance);
+                }
             }
         } else {
             System.out.println("No trades found.");
@@ -131,7 +146,7 @@ public class MonteCarlo {
         System.out.println("=======");
 
         System.out.printf("Final Balance : %,d%n", result.get("final_balance"));
-        System.out.printf("Max Drawdown  : %.2f%n", result.get("max_drawdown"));
+        System.out.printf("Max Drawdown  : %.2f%%%n", result.get("max_drawdown"));
     }
 
     private static String formatWithUnderscores(long number) {
