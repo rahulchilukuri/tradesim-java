@@ -1,15 +1,13 @@
 package com.tradesim;
 
-import com.tradesim.model.Trade;
-
-import java.io.PrintWriter;
-import java.util.List;
-import java.util.Map;
-
 public class Main {
     public static void main(String[] args) throws Exception {
-        Config cfg = Config.montyConfig();
-        //Config cfg = Config.fromJsonFile("config.json");
+        Config cfg;
+        if(System.getProperty("mode") == null) {
+            cfg = Config.singleRunConfig();
+        } else {
+            cfg = Config.montyConfig();
+        }
 
         long start = System.currentTimeMillis();
         if(cfg.montyCarlo) {

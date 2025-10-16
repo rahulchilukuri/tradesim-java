@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.concurrent.*;
 
 public class MonteCarlo {
+    static String dashbar = "=".repeat(80);
     public static void runMonteCarloParallel(Config cfg) throws Exception {
         System.out.println("Running Monte Carlo with " + String.format("%,d", cfg.numSimulations) +
                 " simulations on virtual threads... (batch=" + cfg.batchSize + ")");
@@ -54,13 +55,19 @@ public class MonteCarlo {
         double avg = finalBalances.stream().mapToLong(Long::longValue).average().orElse(0);
         long median = finalBalances.stream().sorted().skip(finalBalances.size()/2).findFirst().orElse(0L);
 
-        System.out.println("\n" + "=".repeat(80));
+        System.out.printf("%n%s%n",dashbar);
+        System.out.printf("Trade Parameters%n");
+        System.out.printf("Min Risk Reward  : %d%n", (int)cfg.minRr);
+        System.out.printf("Max Risk Reward  : %d%n", (int)cfg.maxRr);
+        System.out.printf("Min Win Rate     : %.2f%%%n", 100*cfg.winRateLow);
+        System.out.printf("Max Win Rate     : %.2f%%%n%n", 100*cfg.winRateHigh);
         System.out.println("Monte Carlo Simulation Results (" + String.format("%,d", cfg.numSimulations) + " runs):");
         System.out.println("Target balance: $" + String.format("%,d", cfg.targetBalance));
         System.out.println("Success rate: " + hits + "/" + cfg.numSimulations);
         System.out.println("Bankruptcy rate: " + bankrupt + "/" + cfg.numSimulations);
         System.out.println("Median final balance: $" + median);
         System.out.println("Average final balance: $" + (long) avg);
+        System.out.printf("%s%n",dashbar);
 
         Analyze.analyzeBalances(finalBalances);
     }
@@ -89,7 +96,7 @@ public class MonteCarlo {
 
         if (tradeLog != null && !tradeLog.isEmpty()) {
             try (PrintWriter fileWriter = new PrintWriter("trade_log.csv")) {
-                String headerRow = "%-10s | %-8s | %-4s | %-16s | %-12s | %-8s | %-14s | %-11s%n".formatted("trade_num", "outcome", "rrr", "actual_risk_pct", "risk_amount",
+                String headerRow = "%-10s | %-8s | %-4s | %-16s | %-12s | %-12s | %-14s | %-11s%n".formatted("trade_num", "outcome", "rrr", "actual_risk_pct", "risk_amount",
                         "amount", "start_balance", "end_balance");
                 System.out.printf(headerRow);
 
@@ -97,8 +104,8 @@ public class MonteCarlo {
                 fileWriter.println("\nSUMMARY");
                 fileWriter.println("=======");
 
-                fileWriter.printf("Min RR, %f%n", cfg.minRr);
-                fileWriter.printf("Max RR, %f%n", cfg.maxRr);
+                fileWriter.printf("Min RR, %d%n", (int)cfg.minRr);
+                fileWriter.printf("Max RR, %d%n", (int)cfg.maxRr);
                 fileWriter.printf("Min WinRate, %.2f%%%n", 100*cfg.winRateLow);
                 fileWriter.printf("Max WinRate, %.2f%%%n", 100*cfg.winRateHigh);
                 fileWriter.printf("Final Balance,\"%,d\"%n", (long) result.get("final_balance"));
@@ -106,8 +113,8 @@ public class MonteCarlo {
                 fileWriter.printf("=======%n%n");
 
                 fileWriter.println("trade_num,outcome,rrr,actual_risk_pct,risk_amount,amount,start_balance,end_balance");
-                String print_pattern = "%-10d | %-8s | %-4.1f | %-16.2f | %-12s | %-8s | %-14s | %-11s%n";
-                String csv_pattern = "%-10d , %-8s , %-4.1f , %-16.2f , %-12d , %-8d , %-14d , %-11d%n";
+                String print_pattern = "%-10d | %-8s | %-4.1f | %-16.2f | %-12s | %-12s | %-14s | %-11s%n";
+                String csv_pattern = "%-10d , %-8s , %-4.1f , %-16.2f , %-12d , %-12d , %-14d , %-11d%n";
                 for (Map<String, Object> trade : tradeLog) {
                     int tradeNum = (int) trade.get("trade_num");
                     String outcome = (String) trade.get("outcome");
@@ -143,10 +150,16 @@ public class MonteCarlo {
 
         // Print Summary
         System.out.println("\nSUMMARY");
-        System.out.println("=======");
+        System.out.printf("%n%s%n",dashbar);
 
+        System.out.printf("Min Risk Reward  : %d%n", (int)cfg.minRr);
+        System.out.printf("Max Risk Reward  : %d%n", (int)cfg.maxRr);
+        System.out.printf("Min Win Rate     : %.2f%%%n", 100*cfg.winRateLow);
+        System.out.printf("Max Win Rate     : %.2f%%%n", 100*cfg.winRateHigh);
+        System.out.printf("Max Drawdown  : %.2f%%%n", result.get("max_drawdown"));
         System.out.printf("Final Balance : %,d%n", result.get("final_balance"));
         System.out.printf("Max Drawdown  : %.2f%%%n", result.get("max_drawdown"));
+        System.out.printf("%s%n",dashbar);
     }
 
     private static String formatWithUnderscores(long number) {

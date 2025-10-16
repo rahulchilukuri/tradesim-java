@@ -70,7 +70,7 @@ public class Analyze {
             int idx = (int) Math.min(bins - 1, b / binSize);
             counts[idx]++;
         }
-        System.out.println("-".repeat(80));
+        //System.out.println("-".repeat(80));
         System.out.printf("\nFinal Balance Distribution (< %,d, per $%,d):%n", balance, binSize);
         for (int i = 0; i < counts.length; i++) {
             long lower = i * binSize;

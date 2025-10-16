@@ -13,7 +13,7 @@
   "winRateLow": 0.28,
   "winRateHigh": 0.31,
   "riskDecayFactors": [1.0, 0.9, 0.8, 0.7, 0.6],
-  "montyCarlo": false,
+  "montyCarlo": true,
   "batchSize": 100000,
   "targetBalance": 20000000,
   "numSimulations": 1000000,

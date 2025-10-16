@@ -20,8 +20,14 @@
             <artifactId>msgpack-core</artifactId>
             <version>0.9.8</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10.1</version>
+        </dependency>
     </dependencies>
     <build>
+        <finalName>tradesimulation</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
