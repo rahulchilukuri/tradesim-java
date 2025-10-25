@@ -5,10 +5,11 @@
   "seed": 23,
   "calcTax": true,
   "taxPct": 30.0,
-  "kellyCap": 0.1,
+  "maxRiskPrct": 0.01,
+  "kellyCap": 0.11,
   "reportTrades": true,
-  "minRr": 3.0,
-  "maxRr": 23.0,
+  "minRr": 3,
+  "maxRr": 23,
   "numSampleTrades": 100,
   "winRateLow": 0.28,
   "winRateHigh": 0.31,
@@ -17,5 +18,6 @@
   "batchSize": 100000,
   "targetBalance": 20000000,
   "numSimulations": 1000000,
-  "numMonteCarloWorkers": 100000
+  "numMonteCarloWorkers": 100000,
+  "printTradeSamples": true
 }

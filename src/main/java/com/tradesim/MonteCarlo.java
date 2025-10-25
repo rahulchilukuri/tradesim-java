@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 public class MonteCarlo {
     static String dashbar = "=".repeat(80);
@@ -83,6 +84,7 @@ public class MonteCarlo {
         r.put("max_drawdown", maxDrawdown);
         r.put("hit_target", finalBalance >= cfg.targetBalance);
         r.put("bankrupt", finalBalance == 0);
+        r.put("sample_trades", sampleTrades);
         if(!cfg.montyCarlo) {
             List<Map<String, Object>> tradeLog = (List<Map<String, Object>>) sim.get("trade_log");
             r.put("trade_log", tradeLog);
@@ -93,6 +95,8 @@ public class MonteCarlo {
     public static void runAndSummarizeSingleSimulation(Config cfg) throws Exception {
         Map<String, Object> result = MonteCarlo.runSingleSimulation(cfg);
         List<Map<String, Object>> tradeLog = (List<Map<String, Object>>) result.get("trade_log");
+        int numWins = tradeLog.size();
+        Map<Double, Integer> atMap = new HashMap<>();
 
         if (tradeLog != null && !tradeLog.isEmpty()) {
             try (PrintWriter fileWriter = new PrintWriter("trade_log.csv")) {
@@ -119,11 +123,17 @@ public class MonteCarlo {
                     int tradeNum = (int) trade.get("trade_num");
                     String outcome = (String) trade.get("outcome");
                     double rrr = (double) trade.get("rrr");
+                    if(outcome.equals("Win"))
+                        atMap.put(rrr, atMap.getOrDefault(rrr,0)+1);
                     double actualRiskPct = ((Number) trade.get("actual_risk_pct")).doubleValue();
                     double riskAmount = ((Number) trade.get("risk_amount")).doubleValue();
                     double amount = ((Number) trade.get("amount")).doubleValue();
                     long startBalance = ((Number) trade.get("start_balance")).longValue();
                     long endBalance = ((Number) trade.get("end_balance")).longValue();
+
+                    if(startBalance >= endBalance) {
+                        numWins--;
+                    }
                     String row = print_pattern.formatted(tradeNum,
                             outcome,
                             rrr,
@@ -151,15 +161,48 @@ public class MonteCarlo {
         // Print Summary
         System.out.println("\nSUMMARY");
         System.out.printf("%n%s%n",dashbar);
-
+        System.out.printf("Total Wins       : %d%n", numWins);
+        System.out.printf("Total Trades     : %d%n", cfg.numTrades);
+        System.out.printf("Win %%            : %.2f%n", 100*((double)numWins/cfg.numTrades));
         System.out.printf("Min Risk Reward  : %d%n", (int)cfg.minRr);
         System.out.printf("Max Risk Reward  : %d%n", (int)cfg.maxRr);
         System.out.printf("Min Win Rate     : %.2f%%%n", 100*cfg.winRateLow);
         System.out.printf("Max Win Rate     : %.2f%%%n", 100*cfg.winRateHigh);
-        System.out.printf("Max Drawdown  : %.2f%%%n", result.get("max_drawdown"));
-        System.out.printf("Final Balance : %,d%n", result.get("final_balance"));
-        System.out.printf("Max Drawdown  : %.2f%%%n", result.get("max_drawdown"));
+        System.out.printf("Max Drawdown     : %.2f%%%n", result.get("max_drawdown"));
+        System.out.printf("Final Balance    : %,d%n", result.get("final_balance"));
+        System.out.printf("Max Drawdown     : %.2f%%%n", result.get("max_drawdown"));
         System.out.printf("%s%n",dashbar);
+
+        if(cfg.printTradeSamples) {
+//            List<Trade> sampleTrades = (List<Trade>) result.get("sample_trades");
+//            for(Trade sample: sampleTrades) {
+//                System.out.println(sample.toString());
+//            }
+
+            // Sort by count (descending), then rrr (descending)
+            List<Map.Entry<Double, Integer>> sortedEntries = atMap.entrySet()
+                    .stream()
+                    .sorted(Comparator
+                            .comparing(Map.Entry::getKey))
+                            //.comparing(Map.Entry::getKey, Comparator.reverseOrder()))
+//                            .comparing(Map.Entry<Double, Integer>::getValue, Comparator.reverseOrder())
+//                            .thenComparing(Map.Entry::getKey))  // uses Trade's compareTo()
+                    .toList();
+
+            // Optionally put in LinkedHashMap to preserve order
+            Map<Double, Integer> sortedMap = new LinkedHashMap<>();
+            for (Map.Entry<Double, Integer> entry : sortedEntries) {
+                sortedMap.put(entry.getKey(), entry.getValue());
+            }
+
+            // Print result
+            System.out.printf("%nOut of %d trades, %d unique trades from shuffled samples%n", cfg.numTrades, atMap.size());
+            System.out.printf("%-8s | %3s","Trade","Count");
+            System.out.printf("%n%s%n",dashbar.replace("=","-"));
+            sortedMap.forEach((trade, count) ->
+                    System.out.printf("%-8s | %3d%n", trade, count)
+            );
+        }
     }
 
     private static String formatWithUnderscores(long number) {

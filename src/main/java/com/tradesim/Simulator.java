@@ -13,7 +13,7 @@ public class Simulator {
         double maxDrawdown = 0.0;
 
         double kellyFraction = Kelly.calculateKellyFraction(trades);
-        double cappedKellyFraction = kellyFraction * cfg.kellyCap;
+        double cappedKellyFraction = cfg.kellyCap == 0 ? cfg.maxRiskPrct: kellyFraction * cfg.kellyCap;
         Random rnd = new Random(cfg.seed);
 
         // sampled trades (with replacement)
@@ -25,7 +25,7 @@ public class Simulator {
         List<Map<String, Object>> tradeLog = new ArrayList<>();
         for (int i = 0; i < sampledTrades.size(); i++) {
             Trade trade = sampledTrades.get(i);
-            double currentRiskPercent = Risk.adjustRiskPercent(cappedKellyFraction, i, cfg.numTrades, cfg.riskDecayFactors);
+            double currentRiskPercent = cfg.kellyCap == 0 ? cappedKellyFraction: Risk.adjustRiskPercent(cappedKellyFraction, i, cfg.numTrades, cfg.riskDecayFactors);
             long riskAmount = (long) Math.floor(balance * currentRiskPercent);
             long start = balance;
             double actualRiskPct = start == 0 ? 0.0 : (riskAmount / (double) start) * 100.0;

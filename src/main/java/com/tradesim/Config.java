@@ -13,6 +13,7 @@ public class Config {
     public long seed = 23;
     public boolean calcTax = true;
     public double taxPct = 30.0;
+    public double maxRiskPrct = 0.01;
     public double kellyCap = 0.1;
     public boolean reportTrades = true;
     public double minRr = 3;
@@ -28,6 +29,7 @@ public class Config {
     public long targetBalance = 50_000_000;
     public int numSimulations = 1000;
     public int numMonteCarloWorkers = 100;
+    public boolean printTradeSamples = false;
 
     public Config copyWithSeed(long newSeed) {
         Config c = new Config();
@@ -37,6 +39,7 @@ public class Config {
         c.seed = newSeed;
         c.calcTax = this.calcTax;
         c.taxPct = this.taxPct;
+        c.maxRiskPrct = this.maxRiskPrct;
         c.kellyCap = this.kellyCap;
         c.reportTrades = this.reportTrades;
         c.minRr = this.minRr;
@@ -50,6 +53,7 @@ public class Config {
         c.targetBalance = this.targetBalance;
         c.numSimulations = this.numSimulations;
         c.numMonteCarloWorkers = this.numMonteCarloWorkers;
+        c.printTradeSamples = this.printTradeSamples;
         return c;
     }
 
