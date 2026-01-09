@@ -1,0 +1,29 @@
+{
+  "startingBalance": 10000,
+  "numTrades": 173,
+  "reportInterval": 25,
+  "seed": 23,
+  "calcTax": true,
+  "taxPct": 30.0,
+  "maxRiskPrct": 0.01,
+  "kellyCap": 0.1,
+  "reportTrades": true,
+  "minRr": 3,
+  "maxRr": 20,
+  "numSampleTrades": 100,
+  "winRateLow": 0.30,
+  "winRateHigh": 0.30,
+  "riskDecayFactors": [
+    1.0,
+    0.9,
+    0.8,
+    0.7,
+    0.6
+  ],
+  "montyCarlo": true,
+  "batchSize": 100000,
+  "targetBalance": 20000000,
+  "numSimulations": 1000000,
+  "numMonteCarloWorkers": 1000,
+  "printTradeSamples": true
+}

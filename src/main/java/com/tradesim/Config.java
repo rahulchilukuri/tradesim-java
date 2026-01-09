@@ -21,7 +21,7 @@ public class Config {
     public int numSampleTrades = 100;
     public double winRateLow = 0.28;
     public double winRateHigh = 0.31;
-    public double[] riskDecayFactors = new double[] {1.0, 0.9, 0.8, 0.7, 0.6};
+    public double[] riskDecayFactors = new double[] { 1.0, 0.9, 0.8, 0.7, 0.6 };
 
     // Monte Carlo specific
     public boolean montyCarlo = false;
@@ -58,20 +58,20 @@ public class Config {
     }
 
     public static Config singleRunConfig() throws Exception {
-        Config c = mapper.readValue(new File("config.json"), Config.class);
+        Config c = mapper.readValue(Config.class.getResourceAsStream("/config.json"), Config.class);
         c.montyCarlo = false;
         return c;
     }
 
     public static Config montyConfig() throws Exception {
-//        Config c = new Config();
-//        c.montyCarlo = true;
-//        c.batchSize = 100_000;
-//        c.targetBalance = 20_000_000;
-//        c.numSimulations = 1_000_000;
-//        c.numMonteCarloWorkers = 100_000;
-//        return c;
-        Config c = mapper.readValue(new File("config.json"), Config.class);
+        // Config c = new Config();
+        // c.montyCarlo = true;
+        // c.batchSize = 100_000;
+        // c.targetBalance = 20_000_000;
+        // c.numSimulations = 1_000_000;
+        // c.numMonteCarloWorkers = 100_000;
+        // return c;
+        Config c = mapper.readValue(Config.class.getResourceAsStream("/config.json"), Config.class);
         return c;
     }
 }
