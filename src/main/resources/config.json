@@ -1,6 +1,6 @@
 {
   "startingBalance": 10000,
-  "numTrades": 173,
+  "numTrades": 200,
   "reportInterval": 25,
   "seed": 23,
   "calcTax": true,

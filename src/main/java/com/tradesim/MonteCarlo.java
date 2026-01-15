@@ -203,6 +203,7 @@ public class MonteCarlo {
         System.out.printf("Min Win Rate     : %.2f%%%n", 100 * cfg.winRateLow);
         System.out.printf("Max Win Rate     : %.2f%%%n", 100 * cfg.winRateHigh);
         System.out.printf("Max Drawdown     : %.2f%%%n", result.get("max_drawdown"));
+        System.out.printf("Starting Balance : %,d%n", cfg.startingBalance);
         System.out.printf("Final Balance    : %,d%n", result.get("final_balance"));
         System.out.printf("Max Drawdown     : %.2f%%%n", result.get("max_drawdown"));
         System.out.printf("%s%n", dashbar);
